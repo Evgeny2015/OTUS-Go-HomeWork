@@ -15,17 +15,15 @@ type ParsedRune struct {
 }
 
 func Unpack(str string) (string, error) {
-
 	if str == "" {
 		return "", nil
 	}
 
 	parsed := []ParsedRune{}
-	var lastRune rune = 0
+	var lastRune rune
 	mark := false
 
 	for _, s := range str {
-
 		if mark {
 			lastRune = s
 			mark = false
