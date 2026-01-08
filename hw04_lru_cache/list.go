@@ -43,6 +43,7 @@ func (l *list) Clear() {
 	l.back = nil
 	l.len = 0
 }
+
 func (l *list) PushFront(v interface{}) *ListItem {
 	// creates new ListItem
 	item := &ListItem{Value: v}
@@ -63,6 +64,7 @@ func (l *list) PushFront(v interface{}) *ListItem {
 
 	return item
 }
+
 func (l *list) PushBack(v interface{}) *ListItem {
 	// creates new ListItem
 	item := &ListItem{Value: v}
@@ -83,6 +85,7 @@ func (l *list) PushBack(v interface{}) *ListItem {
 
 	return item
 }
+
 func (l *list) Remove(i *ListItem) {
 	l.LinkItems(i.Prev, i.Next)
 
@@ -96,10 +99,12 @@ func (l *list) Remove(i *ListItem) {
 
 	l.len--
 }
+
 func (l *list) MoveToFront(i *ListItem) {
 	l.Remove(i)
 	l.PushFront(i.Value)
 }
+
 func (l *list) LinkItems(from, to *ListItem) {
 	if from != nil {
 		from.Next = to

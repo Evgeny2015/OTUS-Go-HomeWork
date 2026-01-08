@@ -31,13 +31,11 @@ func (cache *lruCache) Set(key Key, value interface{}) bool {
 
 	if ok {
 		cache.queue.Remove(v)
-	} else {
-		if cache.queue.Len() == cache.capacity {
-			item := cache.queue.Back().Value.(KeyValue)
+	} else if cache.queue.Len() == cache.capacity {
+		item := cache.queue.Back().Value.(KeyValue)
 
-			delete(cache.items, item.key)
-			cache.queue.Remove(cache.queue.Back())
-		}
+		delete(cache.items, item.key)
+		cache.queue.Remove(cache.queue.Back())
 	}
 
 	cache.queue.PushFront(KeyValue{key, value})
@@ -45,6 +43,7 @@ func (cache *lruCache) Set(key Key, value interface{}) bool {
 
 	return ok
 }
+
 func (cache *lruCache) Get(key Key) (interface{}, bool) {
 	mu.Lock()
 	defer mu.Unlock()
@@ -60,6 +59,7 @@ func (cache *lruCache) Get(key Key) (interface{}, bool) {
 
 	return v, ok
 }
+
 func (cache *lruCache) Clear() {
 	mu.Lock()
 	defer mu.Unlock()
