@@ -46,7 +46,7 @@ func Top10(str string) []string {
 
 	// get top 10 words
 	res := make([]string, 0, TopWordCount)
-	for i := 0; i < min(TopWordCount, len(wordSlice)-1); i++ {
+	for i := 0; i < min(TopWordCount, len(wordSlice)); i++ {
 		res = append(res, wordSlice[i].Word)
 	}
 
