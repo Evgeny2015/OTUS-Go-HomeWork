@@ -49,3 +49,43 @@ func TestList(t *testing.T) {
 		require.Equal(t, []int{70, 80, 60, 40, 10, 30, 50}, elems)
 	})
 }
+
+func TestListMethods(t *testing.T) {
+	t.Run("list methods", func(t *testing.T) {
+		l := NewList()
+
+		l.PushFront(10) // [10]
+
+		require.Equal(t, 1, l.Len())
+		require.Equal(t, 10, l.Front().Value)
+		require.Equal(t, 10, l.Back().Value)
+
+		l.PushFront(20) // [20] [10]
+		require.Equal(t, 2, l.Len())
+		require.Nil(t, l.Front().Prev)
+		require.Nil(t, l.Back().Next)
+
+		l.PushBack(30) // [20] [10] [30]
+		items := make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			items = append(items, i.Value.(int))
+		}
+		require.Equal(t, []int{20, 10, 30}, items)
+
+		l.MoveToFront(l.Front().Next) // [10] [20] [30]
+		require.Equal(t, 3, l.Len())
+		require.Nil(t, l.Front().Prev)
+		require.Nil(t, l.Back().Next)
+
+		items = make([]int, 0, l.Len())
+		for i := l.Front(); i != nil; i = i.Next {
+			items = append(items, i.Value.(int))
+		}
+		require.Equal(t, []int{10, 20, 30}, items)
+
+		l.Clear()
+		require.Equal(t, 0, l.Len())
+		require.Nil(t, l.Front())
+		require.Nil(t, l.Back())
+	})
+}
