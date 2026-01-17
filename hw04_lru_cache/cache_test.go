@@ -126,3 +126,26 @@ func TestCacheMultithreading(*testing.T) {
 
 	wg.Wait()
 }
+
+func TestCacheOne(t *testing.T) {
+	t.Run("purge logic1", func(t *testing.T) {
+		c := NewCache(1)
+
+		// fill cache
+		wasInCache := c.Set("aaa", 100) // [aaa]
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200) // [bbb]
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300) // [ccc]
+		require.False(t, wasInCache)
+
+		_, ok := c.Get("aaa")
+		require.False(t, ok)
+
+		val, ok := c.Get("ccc")
+		require.True(t, ok)
+		require.Equal(t, 300, val)
+	})
+}
