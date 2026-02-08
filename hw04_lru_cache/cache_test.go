@@ -50,13 +50,62 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		// fill cache
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300) // [ccc] [bbb] [aaa]
+		require.False(t, wasInCache)
+
+		// set ddd
+		wasInCache = c.Set("ddd", 400) // [ddd] [ccc] [bbb]
+		require.False(t, wasInCache)
+
+		// aaa - is removed
+		val, ok := c.Get("aaa")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("purge logic", func(t *testing.T) {
+		c := NewCache(3)
+
+		// fill cache
+		wasInCache := c.Set("aaa", 100)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200)
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300) // [ccc] [bbb] [aaa]
+		require.False(t, wasInCache)
+
+		// read from cache
+		val, ok := c.Get("aaa") // [aaa] [ccc] [bbb]
+		require.True(t, ok)
+		require.Equal(t, 100, val)
+
+		val, ok = c.Get("ccc") // [ccc] [aaa] [bbb]
+		require.True(t, ok)
+		require.Equal(t, 300, val)
+
+		// set ddd
+		wasInCache = c.Set("ddd", 400) // [ddd] [ccc] [aaa]
+		require.False(t, wasInCache)
+
+		// bbb - is removed
+		val, ok = c.Get("bbb")
+		require.False(t, ok)
+		require.Nil(t, val)
 	})
 }
 
-func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove me if task with asterisk completed.
-
+func TestCacheMultithreading(*testing.T) {
 	c := NewCache(10)
 	wg := &sync.WaitGroup{}
 	wg.Add(2)
@@ -76,4 +125,27 @@ func TestCacheMultithreading(t *testing.T) {
 	}()
 
 	wg.Wait()
+}
+
+func TestCacheOne(t *testing.T) {
+	t.Run("purge logic1", func(t *testing.T) {
+		c := NewCache(1)
+
+		// fill cache
+		wasInCache := c.Set("aaa", 100) // [aaa]
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("bbb", 200) // [bbb]
+		require.False(t, wasInCache)
+
+		wasInCache = c.Set("ccc", 300) // [ccc]
+		require.False(t, wasInCache)
+
+		_, ok := c.Get("aaa")
+		require.False(t, ok)
+
+		val, ok := c.Get("ccc")
+		require.True(t, ok)
+		require.Equal(t, 300, val)
+	})
 }
