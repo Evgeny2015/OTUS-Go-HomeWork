@@ -9,6 +9,11 @@ type (
 type Stage func(in In) (out Out)
 
 func ExecutePipeline(in In, done In, stages ...Stage) Out {
+	// if no stages, return input channel
+	if len(stages) == 0 {
+		return in
+	}
+
 	input := make(Bi)
 	output := make(Bi)
 
