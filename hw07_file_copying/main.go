@@ -26,7 +26,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err := Copy(from, to, limit, offset)
+	err := Copy(from, to, offset, limit)
 	if err != nil {
 		println(err.Error())
 		os.Exit(1)
