@@ -19,21 +19,15 @@ func TestCopy(t *testing.T) {
 	})
 
 	t.Run("invalid offset", func(t *testing.T) {
-		from = "testdata/input.txt"
-		to = "output.txt"
-
 		err := Copy("testdata/input.txt", "output.txt", 10000, 0)
 		require.EqualError(t, ErrOffsetExceedsFileSize, err.Error())
 	})
 
 	t.Run("copy file", func(t *testing.T) {
-		from = "testdata/input.txt"
-		to = "output.txt"
-
 		err := Copy("testdata/input.txt", "output.txt", 0, 0)
 
 		require.Nil(t, err)
 
-		os.Remove(to)
+		os.Remove("output.txt")
 	})
 }
