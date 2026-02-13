@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"os"
 )
 
 var (
@@ -18,5 +19,16 @@ func init() {
 
 func main() {
 	flag.Parse()
-	// Place your code here.
+
+	// check if from and to are set
+	if from == "" || to == "" {
+		println("Usage: go run main.go -from <file> -to <file>")
+		os.Exit(1)
+	}
+
+	err := Copy(from, to, limit, offset)
+	if err != nil {
+		println(err.Error())
+		os.Exit(1)
+	}
 }
