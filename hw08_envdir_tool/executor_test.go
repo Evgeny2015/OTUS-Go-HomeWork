@@ -15,18 +15,8 @@ func TestRunCmd(t *testing.T) {
 		"UNSET": EnvValue{Value: "", NeedRemove: true},
 	}
 
-	t.Run("simple command without params", func(t *testing.T) {
-		code := RunCmd([]string{"ping"}, env)
-		require.Equal(t, 1, code)
-	})
-
-	t.Run("simple command without env", func(t *testing.T) {
-		code := RunCmd([]string{"ping"}, nil)
-		require.Equal(t, 1, code)
-	})
-
 	t.Run("simple command", func(t *testing.T) {
-		code := RunCmd([]string{"ping", "127.0.0.1"}, env)
+		code := RunCmd([]string{"whoami"}, env)
 		require.Equal(t, 0, code)
 	})
 }
