@@ -1,16 +1,28 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
 
+const (
+	ErrCodeWrongParams  = 1
+	ErrCodeUnknownError = 127
+)
+
 // RunCmd runs a command + arguments (cmd) with environment variables from env.
 func RunCmd(cmd []string, env Environment) (returnCode int) {
+	if len(cmd) == 0 {
+		return ErrCodeWrongParams
+	}
 
-	command := exec.Command(cmd[0], cmd[1:]...)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	command := exec.CommandContext(ctx, cmd[0], cmd[1:]...) //nolint:gosec
 
 	// get system environment variables
 	envMap := KeyValueArrayToMap(os.Environ())
@@ -37,19 +49,22 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	command.Stdin = os.Stdin
 
 	// run command
+	var ee *exec.ExitError
 	err := command.Run()
 	if err != nil {
-		if exitError, ok := err.(*exec.ExitError); ok {
-			return exitError.ExitCode()
-		} else {
-			return 127
+		fmt.Println(err)
+
+		if errors.As(err, &ee) {
+			return ee.ExitCode()
 		}
+
+		return ErrCodeUnknownError
 	}
 
 	return 0
 }
 
-// convert key=value string array to map
+// Convert key=value string array to map.
 func KeyValueArrayToMap(kv []string) map[string]string {
 	env := make(map[string]string)
 	for _, kv := range kv {

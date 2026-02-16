@@ -7,7 +7,6 @@ import (
 )
 
 func TestReadDir(t *testing.T) {
-
 	result := Environment{
 		"BAR":   EnvValue{Value: "bar", NeedRemove: false},
 		"EMPTY": EnvValue{Value: "", NeedRemove: false},

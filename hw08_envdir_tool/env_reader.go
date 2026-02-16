@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -35,7 +34,6 @@ func ReadDir(dir string) (Environment, error) {
 		// open file
 		file, err := os.Open(filepath.Join(dir, entry.Name()))
 		if err != nil {
-			fmt.Println(err)
 			continue
 		}
 		defer file.Close()
@@ -43,7 +41,7 @@ func ReadDir(dir string) (Environment, error) {
 		reader := bufio.NewReader(file)
 
 		// read the first line
-		line, err := reader.ReadString('\n')
+		line, _ := reader.ReadString('\n')
 		if line == "" {
 			// append to map with NeedRemove = true
 			env[entry.Name()] = EnvValue{Value: "", NeedRemove: true}
