@@ -50,7 +50,6 @@ func GetDomainStat(r io.Reader, domain string) (result DomainStat, err error) {
 }
 
 func GetEMail(line string) (result string, err error) {
-
 	index := strings.Index(line, "Email")
 	if index < 0 {
 		return "", fmt.Errorf("EMail not found")
