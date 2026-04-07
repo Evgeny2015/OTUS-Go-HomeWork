@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,12 +13,35 @@ import (
 	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
 
 func init() {
 	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+}
+
+func createStorage(conf StorageConf, logg *logger.Logger) (app.Storage, error) {
+	switch conf.Type {
+	case "memory":
+		return memorystorage.New(), nil
+	case "sql":
+		if conf.DSN == "" {
+			// Use default DSN from sqlstorage.Connect (for backward compatibility)
+			// but we can also error out.
+			logg.Warning("DSN not provided, using default PostgreSQL connection")
+			storage := sqlstorage.New()
+			ctx := context.Background()
+			if err := storage.Connect(ctx); err != nil {
+				return nil, fmt.Errorf("failed to connect to database: %w", err)
+			}
+			return storage, nil
+		}
+		return sqlstorage.NewWithDSN(conf.DSN)
+	default:
+		return nil, fmt.Errorf("unknown storage type: %s", conf.Type)
+	}
 }
 
 func main() {
@@ -35,7 +59,11 @@ func main() {
 		Format: config.Logger.Format,
 	})
 
-	storage := memorystorage.New()
+	storage, err := createStorage(config.Storage, logg)
+	if err != nil {
+		logg.Error("failed to create storage: " + err.Error())
+		os.Exit(1)
+	}
 	calendar := app.New(logg, storage)
 
 	server := internalhttp.NewServer(logg, calendar)

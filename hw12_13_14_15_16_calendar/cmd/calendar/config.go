@@ -11,14 +11,19 @@ import (
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
-	Logger LoggerConf
-	// TODO: add other sections (HTTP, storage, etc.)
+	Logger  LoggerConf
+	Storage StorageConf
 }
 
 type LoggerConf struct {
 	Level  string `toml:"level"`
 	Output string `toml:"output"` // file path, empty for stdout
 	Format string `toml:"format"` // "text" or "json"
+}
+
+type StorageConf struct {
+	Type string `toml:"type"` // "memory" or "sql"
+	DSN  string `toml:"dsn"`  // Data Source Name for SQL storage, optional for memory
 }
 
 func NewConfig() Config {
@@ -39,6 +44,9 @@ func LoadConfig(filename string) (Config, error) {
 	}
 	if config.Logger.Format == "" {
 		config.Logger.Format = "text"
+	}
+	if config.Storage.Type == "" {
+		config.Storage.Type = "memory"
 	}
 	return config, nil
 }
