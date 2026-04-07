@@ -1,0 +1,12 @@
+=== RUN   TestGetDomainStat_Time_And_Memory
+    stats_optimization_test.go:46: time used: 192.4387ms / 300ms
+    stats_optimization_test.go:47: memory used: 164Mb / 30Mb
+    stats_optimization_test.go:50: 
+        	Error Trace:	C:/Work/OTUS/Golang/OTUS-Go-HomeWork/hw10_program_optimization/stats_optimization_test.go:50
+        	Error:      	"172298128" is not less than "31457280"
+        	Test:       	TestGetDomainStat_Time_And_Memory
+        	Messages:   	the program is too greedy
+--- FAIL: TestGetDomainStat_Time_And_Memory (2.55s)
+FAIL
+FAIL	github.com/Evgeny2015/OTUS-Go-HomeWork/hw10_program_optimization	3.545s
+FAIL

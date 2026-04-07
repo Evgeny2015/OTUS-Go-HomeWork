@@ -1,0 +1,12 @@
+=== RUN   TestGetDomainStat_Time_And_Memory
+    stats_optimization_test.go:46: time used: 308.4881ms / 300ms
+    stats_optimization_test.go:47: memory used: 296Mb / 30Mb
+    stats_optimization_test.go:49: 
+        	Error Trace:	C:/Work/OTUS/Golang/OTUS-Go-HomeWork/hw10_program_optimization/stats_optimization_test.go:49
+        	Error:      	"308488100" is not less than "300000000"
+        	Test:       	TestGetDomainStat_Time_And_Memory
+        	Messages:   	the program is too slow
+--- FAIL: TestGetDomainStat_Time_And_Memory (5.95s)
+FAIL
+FAIL	github.com/Evgeny2015/OTUS-Go-HomeWork/hw10_program_optimization	6.660s
+FAIL

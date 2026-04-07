@@ -1,13 +1,13 @@
 package hw10programoptimization
 
 import (
-	"encoding/json"
+	"bufio"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 )
 
+//easyjson:json
 type User struct {
 	ID       int
 	Name     string
@@ -20,47 +20,61 @@ type User struct {
 
 type DomainStat map[string]int
 
-func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
-	u, err := getUsers(r)
-	if err != nil {
-		return nil, fmt.Errorf("get users error: %w", err)
+func GetDomainStat(r io.Reader, domain string) (result DomainStat, err error) {
+	result = make(DomainStat)
+	scanner := bufio.NewScanner(r)
+	domain = "." + domain
+
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == "" {
+			continue
+		}
+
+		email, err := GetEMail(line)
+		if err != nil {
+			return nil, fmt.Errorf("get users error: %w", err)
+		}
+
+		err = CountDomain(email, domain, result)
+		if err != nil {
+			return nil, fmt.Errorf("get domain error: %w", err)
+		}
 	}
-	return countDomains(u, domain)
-}
 
-type users [100_000]User
-
-func getUsers(r io.Reader) (result users, err error) {
-	content, err := io.ReadAll(r)
-	if err != nil {
+	if err = scanner.Err(); err != nil {
 		return
 	}
 
-	lines := strings.Split(string(content), "\n")
-	for i, line := range lines {
-		var user User
-		if err = json.Unmarshal([]byte(line), &user); err != nil {
-			return
-		}
-		result[i] = user
+	return result, err
+}
+
+func GetEMail(line string) (result string, err error) {
+	index := strings.Index(line, "Email")
+	if index < 0 {
+		return "", fmt.Errorf("EMail not found")
 	}
+
+	rest := line[index+8:]
+	index = strings.Index(rest, "\"")
+	if index < 0 {
+		return "", fmt.Errorf("JSON error")
+	}
+	result = rest[:index]
+
 	return
 }
 
-func countDomains(u users, domain string) (DomainStat, error) {
-	result := make(DomainStat)
+func CountDomain(email string, domain string, stat DomainStat) error {
+	matched := strings.Contains(email, domain)
 
-	for _, user := range u {
-		matched, err := regexp.Match("\\."+domain, []byte(user.Email))
-		if err != nil {
-			return nil, err
-		}
+	if matched {
+		key := strings.ToLower(strings.SplitN(email, "@", 2)[1])
 
-		if matched {
-			num := result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]
-			num++
-			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])] = num
-		}
+		num := stat[key]
+		num++
+		stat[key] = num
 	}
-	return result, nil
+
+	return nil
 }
