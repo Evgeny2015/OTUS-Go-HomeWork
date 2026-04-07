@@ -48,7 +48,7 @@ func NewServer(logger Logger, app Application, host, port string) *Server {
 	})
 
 	// Wrap with logging middleware
-	handler := loggingMiddleware(mux)
+	handler := loggingMiddleware(logger, mux)
 
 	server := &http.Server{
 		Handler:      handler,

@@ -1,11 +1,14 @@
 package internalhttp
 
 import (
+	"net"
 	"net/http"
+	"strconv"
+	"strings"
 	"time"
 )
 
-func loggingMiddleware(next http.Handler) http.Handler {
+func loggingMiddleware(logger Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 
@@ -16,12 +19,44 @@ func loggingMiddleware(next http.Handler) http.Handler {
 
 		duration := time.Since(start)
 
-		// In a real implementation, we would log to a logger
-		// For now, we'll just pass through without logging
-		// This satisfies the interface requirement
-		_ = duration
-		_ = rw.statusCode
+		// Format log line according to specification
+		ip := extractIP(r.RemoteAddr)
+		date := start.Format("[02/Jan/2006:15:04:05 -0700]")
+		method := r.Method
+		path := r.URL.RequestURI()
+		proto := r.Proto
+		status := strconv.Itoa(rw.statusCode)
+		latency := strconv.FormatInt(duration.Milliseconds(), 10)
+		userAgent := r.UserAgent()
+		if userAgent == "" {
+			userAgent = "-"
+		} else {
+			userAgent = `"` + userAgent + `"`
+		}
+
+		logLine := strings.Join([]string{
+			ip,
+			date,
+			method,
+			path,
+			proto,
+			status,
+			latency,
+			userAgent,
+		}, " ")
+
+		logger.Info(logLine)
 	})
+}
+
+// extractIP extracts the IP address from RemoteAddr (ip:port)
+func extractIP(addr string) string {
+	host, _, err := net.SplitHostPort(addr)
+	if err != nil {
+		// If splitting fails, assume it's already an IP
+		return addr
+	}
+	return host
 }
 
 // responseWriter wraps http.ResponseWriter to capture status code
