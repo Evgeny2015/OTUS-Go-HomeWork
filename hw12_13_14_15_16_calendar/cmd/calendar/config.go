@@ -13,6 +13,7 @@ import (
 type Config struct {
 	Logger  LoggerConf
 	Storage StorageConf
+	HTTP    HTTPConf
 }
 
 type LoggerConf struct {
@@ -26,10 +27,20 @@ type StorageConf struct {
 	DSN  string `toml:"dsn"`  // Data Source Name for SQL storage, optional for memory
 }
 
+type HTTPConf struct {
+	Host string `toml:"host"`
+	Port string `toml:"port"`
+}
+
 func NewConfig() Config {
 	// For backward compatibility, return empty config.
 	// In production, LoadConfig should be used.
-	return Config{}
+	return Config{
+		HTTP: HTTPConf{
+			Host: "localhost",
+			Port: "8080",
+		},
+	}
 }
 
 // LoadConfig reads configuration from the specified TOML file.
@@ -47,6 +58,12 @@ func LoadConfig(filename string) (Config, error) {
 	}
 	if config.Storage.Type == "" {
 		config.Storage.Type = "memory"
+	}
+	if config.HTTP.Host == "" {
+		config.HTTP.Host = "localhost"
+	}
+	if config.HTTP.Port == "" {
+		config.HTTP.Port = "8080"
 	}
 	return config, nil
 }
