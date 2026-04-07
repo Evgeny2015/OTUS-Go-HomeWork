@@ -19,7 +19,7 @@ func New() *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
+func (s *Storage) CreateEvent(_ context.Context, event storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -30,7 +30,7 @@ func (s *Storage) CreateEvent(ctx context.Context, event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
+func (s *Storage) UpdateEvent(_ context.Context, event storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -41,7 +41,7 @@ func (s *Storage) UpdateEvent(ctx context.Context, event storage.Event) error {
 	return nil
 }
 
-func (s *Storage) DeleteEvent(ctx context.Context, id string) error {
+func (s *Storage) DeleteEvent(_ context.Context, id string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -52,7 +52,7 @@ func (s *Storage) DeleteEvent(ctx context.Context, id string) error {
 	return nil
 }
 
-func (s *Storage) GetEvent(ctx context.Context, id string) (*storage.Event, error) {
+func (s *Storage) GetEvent(_ context.Context, id string) (*storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -63,7 +63,7 @@ func (s *Storage) GetEvent(ctx context.Context, id string) (*storage.Event, erro
 	return &event, nil
 }
 
-func (s *Storage) ListEvents(ctx context.Context) ([]storage.Event, error) {
+func (s *Storage) ListEvents(_ context.Context) ([]storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

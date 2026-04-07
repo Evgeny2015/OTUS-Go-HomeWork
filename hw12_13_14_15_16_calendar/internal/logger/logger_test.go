@@ -196,7 +196,8 @@ func TestLogger_JSONFormat(t *testing.T) {
 
 	// Check timestamp format (should match "2006-01-02 15:04:05")
 	timestamp := entry["timestamp"]
-	if len(timestamp) != 19 || timestamp[4] != '-' || timestamp[7] != '-' || timestamp[10] != ' ' || timestamp[13] != ':' || timestamp[16] != ':' {
+	if len(timestamp) != 19 || timestamp[4] != '-' || timestamp[7] != '-' ||
+		timestamp[10] != ' ' || timestamp[13] != ':' || timestamp[16] != ':' {
 		t.Errorf("timestamp %q does not match expected format YYYY-MM-DD HH:MM:SS", timestamp)
 	}
 

@@ -41,7 +41,7 @@ func NewServer(logger Logger, app Application, host, port string) *Server {
 	})
 
 	// Add /hello endpoint as well
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Hello, World!")

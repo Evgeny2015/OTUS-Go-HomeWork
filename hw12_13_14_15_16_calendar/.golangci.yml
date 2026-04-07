@@ -1,0 +1,43 @@
+version: "2"
+run:
+  tests: true
+linters:
+  default: none
+  enable:
+    - depguard
+  settings:
+    depguard:
+      rules:
+        Main:
+          files:
+            - $all
+            - '!$test'
+          allow:
+            - $gostd
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/app
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/config
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/logger
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/server/http
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/memory
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/sql
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/...
+            - github.com/BurntSushi/toml
+            - github.com/jmoiron/sqlx
+            - github.com/lib/pq
+            - github.com/mfridman/interpolate
+            - github.com/pressly/goose/v3
+            - github.com/sethvargo/go-retry
+            - go.uber.org/multierr
+            - golang.org/x/sync
+        Test:
+          files:
+            - $test
+          allow:
+            - $gostd
+            - github.com/stretchr/testify
+            - go.uber.org/goleak
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/...
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage

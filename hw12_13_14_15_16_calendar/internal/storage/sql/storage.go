@@ -30,7 +30,7 @@ func NewWithDSN(dsn string) (*Storage, error) {
 	return &Storage{db: db}, nil
 }
 
-func (s *Storage) Connect(ctx context.Context) error {
+func (s *Storage) Connect(_ context.Context) error {
 	// For backward compatibility, use default DSN
 	dsn := "host=localhost port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
 	db, err := sqlx.Connect("postgres", dsn)
@@ -41,7 +41,7 @@ func (s *Storage) Connect(ctx context.Context) error {
 	return nil
 }
 
-func (s *Storage) Close(ctx context.Context) error {
+func (s *Storage) Close(_ context.Context) error {
 	if s.db != nil {
 		return s.db.Close()
 	}
@@ -200,7 +200,7 @@ func (s *Storage) listEventsInRange(ctx context.Context, start, end time.Time) (
 	return events, nil
 }
 
-// dbEvent is a helper struct for database mapping
+// dbEvent is a helper struct for database mapping.
 type dbEvent struct {
 	ID           string    `db:"id"`
 	Title        string    `db:"title"`

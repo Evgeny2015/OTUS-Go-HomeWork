@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -70,7 +70,7 @@ func LoadConfig(filename string) (Config, error) {
 
 // LoadConfigFromDefault attempts to load config from the file specified by the -config flag.
 // If the file does not exist or flag is not set, returns default config.
-func LoadConfigFromDefault() Config {
+func LoadConfigFromDefault(configFile string) Config {
 	if configFile == "" {
 		return NewConfig()
 	}

@@ -2,6 +2,7 @@ package memorystorage
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -70,7 +71,7 @@ func TestStorage(t *testing.T) {
 
 	// Ensure event is deleted
 	_, err = s.GetEvent(ctx, "test-id")
-	if err != storage.ErrEventNotFound {
+	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("Expected ErrEventNotFound after delete, got %v", err)
 	}
 }
@@ -84,7 +85,7 @@ func TestStorageDuplicateCreate(t *testing.T) {
 		t.Fatalf("First CreateEvent failed: %v", err)
 	}
 	err = s.CreateEvent(ctx, event)
-	if err != storage.ErrEventAlreadyExists {
+	if !errors.Is(err, storage.ErrEventAlreadyExists) {
 		t.Errorf("Expected ErrEventAlreadyExists, got %v", err)
 	}
 }
@@ -94,7 +95,7 @@ func TestStorageUpdateNonExistent(t *testing.T) {
 	s := New()
 	event := storage.Event{ID: "nonexistent", Title: "No"}
 	err := s.UpdateEvent(ctx, event)
-	if err != storage.ErrEventNotFound {
+	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("Expected ErrEventNotFound, got %v", err)
 	}
 }
@@ -103,7 +104,7 @@ func TestStorageDeleteNonExistent(t *testing.T) {
 	ctx := context.Background()
 	s := New()
 	err := s.DeleteEvent(ctx, "nonexistent")
-	if err != storage.ErrEventNotFound {
+	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Errorf("Expected ErrEventNotFound, got %v", err)
 	}
 }

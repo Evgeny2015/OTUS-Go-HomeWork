@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-// mockLogger implements Logger interface for testing
+// mockLogger implements Logger interface for testing.
 type mockLogger struct {
 	messages []string
 }
@@ -31,7 +31,7 @@ func (m *mockLogger) Debug(msg string) {
 	m.messages = append(m.messages, "DEBUG: "+msg)
 }
 
-// mockApp implements Application interface for testing
+// mockApp implements Application interface for testing.
 type mockApp struct{}
 
 func TestServerHelloEndpoint(t *testing.T) {
@@ -100,7 +100,7 @@ func testDirectHandler(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Hello, World!")
 	})
-	mux.HandleFunc("/hello", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/hello", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, "Hello, World!")

@@ -49,7 +49,7 @@ func loggingMiddleware(logger Logger, next http.Handler) http.Handler {
 	})
 }
 
-// extractIP extracts the IP address from RemoteAddr (ip:port)
+// extractIP extracts the IP address from RemoteAddr (ip:port).
 func extractIP(addr string) string {
 	host, _, err := net.SplitHostPort(addr)
 	if err != nil {
@@ -59,7 +59,7 @@ func extractIP(addr string) string {
 	return host
 }
 
-// responseWriter wraps http.ResponseWriter to capture status code
+// responseWriter wraps http.ResponseWriter to capture status code.
 type responseWriter struct {
 	http.ResponseWriter
 	statusCode int
