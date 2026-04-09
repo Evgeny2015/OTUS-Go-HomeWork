@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package calendar;
+
+option go_package = "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/protobuf";
+
+import "internal/protobuf/event.proto";
+import "google/protobuf/timestamp.proto";
+
+// ListEventsForDay
+message ListEventsForDayRequest {
+    google.protobuf.Timestamp date = 1;
+}
+
+message ListEventsForDayResponse {
+    repeated Event events = 1;
+}
+
+// ListEventsForWeek
+message ListEventsForWeekRequest {
+    google.protobuf.Timestamp start_of_week = 1;
+}
+
+message ListEventsForWeekResponse {
+    repeated Event events = 1;
+}
+
+// ListEventsForMonth
+message ListEventsForMonthRequest {
+    google.protobuf.Timestamp start_of_month = 1;
+}
+
+message ListEventsForMonthResponse {
+    repeated Event events = 1;
+}
