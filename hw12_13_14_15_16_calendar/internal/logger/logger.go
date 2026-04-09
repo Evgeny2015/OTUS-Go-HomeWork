@@ -71,7 +71,7 @@ func NewFromConfig(cfg Config) *Logger {
 	}
 	var output io.Writer = os.Stdout
 	if cfg.Output != "" {
-		file, err := os.OpenFile(cfg.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+		file, err := os.OpenFile(cfg.Output, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0x666)
 		if err != nil {
 			// fallback to stdout, but we cannot log because logger not ready
 			// just ignore and keep stdout
