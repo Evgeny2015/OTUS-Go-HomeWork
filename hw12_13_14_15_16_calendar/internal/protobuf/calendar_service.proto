@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package calendar;
+
+option go_package = "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/protobuf";
+
+import "internal/protobuf/create_event.proto";
+import "internal/protobuf/update_event.proto";
+import "internal/protobuf/delete_event.proto";
+import "internal/protobuf/list_events.proto";
+
+// CalendarService provides operations for calendar events
+service CalendarService {
+    rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+    rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse);
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+    rpc ListEventsForDay(ListEventsForDayRequest) returns (ListEventsForDayResponse);
+    rpc ListEventsForWeek(ListEventsForWeekRequest) returns (ListEventsForWeekResponse);
+    rpc ListEventsForMonth(ListEventsForMonthRequest) returns (ListEventsForMonthResponse);
+}

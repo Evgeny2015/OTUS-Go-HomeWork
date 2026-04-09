@@ -5,6 +5,7 @@ linters:
   default: none
   enable:
     - depguard
+    - whitespace
   settings:
     depguard:
       rules:
@@ -17,6 +18,7 @@ linters:
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/app
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/config
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/logger
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/server/protobuf
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/server/http
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/memory
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/sql
@@ -31,6 +33,8 @@ linters:
             - github.com/sethvargo/go-retry
             - go.uber.org/multierr
             - golang.org/x/sync
+            - google.golang.org/grpc
+            - google.golang.org/protobuf
         Test:
           files:
             - $test
@@ -40,4 +44,10 @@ linters:
             - go.uber.org/goleak
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/...
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/server/protobuf
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage
+            - google.golang.org/grpc
+            - google.golang.org/protobuf
+formatters:
+  enable:
+    - gofumpt
