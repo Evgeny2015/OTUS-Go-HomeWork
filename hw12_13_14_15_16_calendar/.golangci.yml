@@ -25,7 +25,6 @@ linters:
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/...
-            - github.com/BurntSushi/toml
             - github.com/jmoiron/sqlx
             - github.com/lib/pq
             - github.com/mfridman/interpolate

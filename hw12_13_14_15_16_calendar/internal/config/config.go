@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v3"
 )
 
 // При желании конфигурацию можно вынести в internal/config.
@@ -17,19 +17,19 @@ type Config struct {
 }
 
 type LoggerConf struct {
-	Level  string `toml:"level"`
-	Output string `toml:"output"` // file path, empty for stdout
-	Format string `toml:"format"` // "text" or "json"
+	Level  string `yaml:"level"`
+	Output string `yaml:"output"` // file path, empty for stdout
+	Format string `yaml:"format"` // "text" or "json"
 }
 
 type StorageConf struct {
-	Type string `toml:"type"` // "memory" or "sql"
-	DSN  string `toml:"dsn"`  // Data Source Name for SQL storage, optional for memory
+	Type string `yaml:"type"` // "memory" or "sql"
+	DSN  string `yaml:"dsn"`  // Data Source Name for SQL storage, optional for memory
 }
 
 type HTTPConf struct {
-	Host string `toml:"host"`
-	Port string `toml:"port"`
+	Host string `yaml:"host"`
+	Port string `yaml:"port"`
 }
 
 func NewConfig() Config {
@@ -43,12 +43,19 @@ func NewConfig() Config {
 	}
 }
 
-// LoadConfig reads configuration from the specified TOML file.
+// LoadConfig reads configuration from the specified YAML file.
 func LoadConfig(filename string) (Config, error) {
 	var config Config
-	if _, err := toml.DecodeFile(filename, &config); err != nil {
-		return config, fmt.Errorf("failed to decode config file %s: %w", filename, err)
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return config, fmt.Errorf("failed to read config file %s: %w", filename, err)
 	}
+
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return config, fmt.Errorf("failed to decode YAML config file %s: %w", filename, err)
+	}
+
 	// Set defaults
 	if config.Logger.Level == "" {
 		config.Logger.Level = "INFO"

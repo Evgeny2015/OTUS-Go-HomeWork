@@ -20,7 +20,7 @@ import (
 var configFile string
 
 func init() {
-	flag.StringVar(&configFile, "config", "/etc/calendar/config.toml", "Path to configuration file")
+	flag.StringVar(&configFile, "config", "/etc/calendar/calendar_config.yml", "Path to configuration file")
 }
 
 func createStorage(conf config.StorageConf, logg *logger.Logger) (app.Storage, error) {
