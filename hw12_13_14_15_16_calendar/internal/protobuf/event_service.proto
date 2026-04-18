@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package calendar;
+
+option go_package = "github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/protobuf";
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+// Event represents a calendar event
+message Event {
+    string id = 1;
+    string title = 2;
+    google.protobuf.Timestamp date_time = 3;
+    google.protobuf.Duration duration = 4;
+    string description = 5;
+    string user_id = 6;
+    google.protobuf.Duration notify_before = 7;
+}
+
+// CreateEvent
+message CreateEventRequest {
+    Event event = 1;
+}
+
+message CreateEventResponse {
+    Event event = 1;
+}
+
+// UpdateEvent
+message UpdateEventRequest {
+    string id = 1;
+    Event event = 2;
+}
+
+message UpdateEventResponse {
+    Event event = 1;
+}
+
+// DeleteEvent
+message DeleteEventRequest {
+    string id = 1;
+}
+
+message DeleteEventResponse {
+    bool success = 1;
+}
+
+// ListEventsForDay
+message ListEventsForDayRequest {
+    google.protobuf.Timestamp date = 1;
+}
+
+message ListEventsForDayResponse {
+    repeated Event events = 1;
+}
+
+// ListEventsForWeek
+message ListEventsForWeekRequest {
+    google.protobuf.Timestamp start_of_week = 1;
+}
+
+message ListEventsForWeekResponse {
+    repeated Event events = 1;
+}
+
+// ListEventsForMonth
+message ListEventsForMonthRequest {
+    google.protobuf.Timestamp start_of_month = 1;
+}
+
+message ListEventsForMonthResponse {
+    repeated Event events = 1;
+}
+
+// CalendarService provides operations for calendar events
+service CalendarService {
+    rpc CreateEvent(CreateEventRequest) returns (CreateEventResponse);
+    rpc UpdateEvent(UpdateEventRequest) returns (UpdateEventResponse);
+    rpc DeleteEvent(DeleteEventRequest) returns (DeleteEventResponse);
+    rpc ListEventsForDay(ListEventsForDayRequest) returns (ListEventsForDayResponse);
+    rpc ListEventsForWeek(ListEventsForWeekRequest) returns (ListEventsForWeekResponse);
+    rpc ListEventsForMonth(ListEventsForMonthRequest) returns (ListEventsForMonthResponse);
+}

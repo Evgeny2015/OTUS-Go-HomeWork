@@ -37,12 +37,7 @@ func New(logger Logger, storage Storage) *App {
 	}
 }
 
-func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	event := storage.Event{
-		ID:    id,
-		Title: title,
-		// other fields are zero values
-	}
+func (a *App) CreateEvent(ctx context.Context, event storage.Event) error {
 	return a.storage.CreateEvent(ctx, event)
 }
 
