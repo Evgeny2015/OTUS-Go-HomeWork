@@ -28,6 +28,11 @@ type Storage interface {
 	ListEventsForDay(ctx context.Context, date time.Time) ([]storage.Event, error)
 	ListEventsForWeek(ctx context.Context, startOfWeek time.Time) ([]storage.Event, error)
 	ListEventsForMonth(ctx context.Context, startOfMonth time.Time) ([]storage.Event, error)
+	// GetEventsForNotification returns events that need notifications sent
+	// based on current time and NotifyBefore field
+	GetEventsForNotification(ctx context.Context, fromTime, toTime time.Time) ([]storage.Event, error)
+	// DeleteOldEvents deletes events that occurred more than specified duration ago
+	DeleteOldEvents(ctx context.Context, olderThan time.Time) error
 }
 
 func New(logger Logger, storage Storage) *App {

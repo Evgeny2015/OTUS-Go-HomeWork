@@ -235,3 +235,53 @@ func isDuplicateKeyError(err error) bool {
 	errStr := err.Error()
 	return strings.Contains(errStr, "23505") || strings.Contains(errStr, "duplicate key")
 }
+
+func (s *Storage) GetEventsForNotification(ctx context.Context, fromTime, toTime time.Time) ([]storage.Event, error) {
+	if s.db == nil {
+		return nil, errors.New("database not connected")
+	}
+
+	query := `
+		SELECT id, title, date_time, duration, description, user_id, notify_before
+		FROM events
+		WHERE (
+			date_time - COALESCE(notify_before, 0) >= $1
+			AND date_time - COALESCE(notify_before, 0) < $2
+		)
+		ORDER BY date_time
+	`
+
+	var dbEvents []dbEvent
+	err := s.db.SelectContext(ctx, &dbEvents, query, fromTime, toTime)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query events for notification: %w", err)
+	}
+
+	events := make([]storage.Event, 0, len(dbEvents))
+	for _, dbEvent := range dbEvents {
+		events = append(events, *dbEvent.toStorageEvent())
+	}
+	return events, nil
+}
+
+func (s *Storage) DeleteOldEvents(ctx context.Context, olderThan time.Time) error {
+	if s.db == nil {
+		return errors.New("database not connected")
+	}
+
+	query := `DELETE FROM events WHERE date_time < $1`
+	result, err := s.db.ExecContext(ctx, query, olderThan)
+	if err != nil {
+		return fmt.Errorf("failed to delete old events: %w", err)
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rowsAffected > 0 {
+		// Logging would be done by the caller
+	}
+	return nil
+}

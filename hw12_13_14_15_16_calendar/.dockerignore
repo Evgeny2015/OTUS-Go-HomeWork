@@ -1,0 +1,60 @@
+# Игнорируем файлы, не нужные в Docker образе
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Go
+*.test
+*.out
+coverage.txt
+profile.out
+
+# Binaries
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Logs
+*.log
+logs/
+
+# Temp files
+tmp/
+temp/
+
+# Configs (кроме нужных)
+configs/*.toml
+!configs/calendar_config.yml
+
+# Документация
+docs/
+README.md
+
+# Тестовые данные
+testdata/
+
+# Миграции (оставляем, они нужны)
+# !migrations/
+
+# Сборки
+build/
+Dockerfile*
+
+# Прочее
+.dockerignore
+.golangci.yml
+Makefile
+Chart.yaml
+values.yaml
+templates/

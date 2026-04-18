@@ -149,7 +149,7 @@ func TestLoadConfig_FileNotFound(t *testing.T) {
 	}
 
 	// Config should be zero value
-	if config != (Config{}) {
+	if config != (CalendarConfig{}) {
 		t.Errorf("expected zero config, got %+v", config)
 	}
 }
@@ -168,7 +168,7 @@ func TestLoadConfig_InvalidYAML(t *testing.T) {
 	}
 
 	// Config should be zero value
-	if config != (Config{}) {
+	if config != (CalendarConfig{}) {
 		t.Errorf("expected zero config, got %+v", config)
 	}
 }
@@ -244,12 +244,12 @@ func TestConfigDefaults(t *testing.T) {
 	testCases := []struct {
 		name     string
 		yaml     string
-		expected Config
+		expected CalendarConfig
 	}{
 		{
 			name: "empty logger level defaults to INFO",
 			yaml: `logger: {}`,
-			expected: Config{
+			expected: CalendarConfig{
 				Logger:  LoggerConf{Level: "INFO", Format: "text"},
 				Storage: StorageConf{Type: "memory"},
 				HTTP:    HTTPConf{Host: "localhost", Port: "8080"},
@@ -258,7 +258,7 @@ func TestConfigDefaults(t *testing.T) {
 		{
 			name: "empty storage type defaults to memory",
 			yaml: `storage: {}`,
-			expected: Config{
+			expected: CalendarConfig{
 				Logger:  LoggerConf{Level: "INFO", Format: "text"},
 				Storage: StorageConf{Type: "memory"},
 				HTTP:    HTTPConf{Host: "localhost", Port: "8080"},
@@ -267,7 +267,7 @@ func TestConfigDefaults(t *testing.T) {
 		{
 			name: "empty http host defaults to localhost",
 			yaml: `http: {}`,
-			expected: Config{
+			expected: CalendarConfig{
 				Logger:  LoggerConf{Level: "INFO", Format: "text"},
 				Storage: StorageConf{Type: "memory"},
 				HTTP:    HTTPConf{Host: "localhost", Port: "8080"},
@@ -286,7 +286,7 @@ http:
   host: "example.com"
   port: "3000"
 `,
-			expected: Config{
+			expected: CalendarConfig{
 				Logger:  LoggerConf{Level: "ERROR", Format: "json"},
 				Storage: StorageConf{Type: "sql", DSN: "test"},
 				HTTP:    HTTPConf{Host: "example.com", Port: "3000"},
