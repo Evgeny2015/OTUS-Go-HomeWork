@@ -15,6 +15,7 @@ linters:
             - '!$test'
           allow:
             - $gostd
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/app
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/config
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/logger
@@ -23,9 +24,9 @@ linters:
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/memory
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/sql
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage
+            - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/rmq
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar
             - github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/...
-            - github.com/BurntSushi/toml
             - github.com/jmoiron/sqlx
             - github.com/lib/pq
             - github.com/mfridman/interpolate
@@ -35,6 +36,8 @@ linters:
             - golang.org/x/sync
             - google.golang.org/grpc
             - google.golang.org/protobuf
+            - gopkg.in/yaml.v3
+            - github.com/rabbitmq/amqp091-go
         Test:
           files:
             - $test

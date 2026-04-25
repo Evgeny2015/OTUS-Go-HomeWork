@@ -1,0 +1,12 @@
+logger:
+  level: "DEBUG"
+  output: "/var/log/calendar.log"
+  format: "json"
+
+storage:
+  type: "sql"
+  dsn: "host=localhost port=5432 user=postgres password=postgres dbname=calendar"
+
+http:
+  host: "0.0.0.0"
+  port: "9090"

@@ -1,0 +1,8 @@
+# Only partial configuration, defaults should be applied
+storage:
+  type: "memory"
+  # dsn omitted
+
+http:
+  host: "127.0.0.1"
+  # port omitted, should default to 8080

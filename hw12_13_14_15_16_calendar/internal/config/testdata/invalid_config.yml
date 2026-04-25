@@ -1,0 +1,8 @@
+logger:
+  level: "DEBUG"
+  output: "/var/log/calendar.log"
+  format: "json"
+invalid yaml: [ this is not valid yaml
+storage:
+  type: "sql"
+  dsn: "host=localhost"
