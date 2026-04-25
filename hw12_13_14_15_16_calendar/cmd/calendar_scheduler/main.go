@@ -61,11 +61,7 @@ func main() {
 	}
 
 	// Initialize RabbitMQ
-	queue := rmq.NewRabbitMQ(
-		cfg.RabbitMQ.URI,
-		cfg.RabbitMQ.QueueName,
-		cfg.RabbitMQ.ExchangeName,
-	)
+	queue := rmq.NewRabbitMQFromConfig(&cfg.RabbitMQ)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

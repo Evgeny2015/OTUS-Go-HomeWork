@@ -9,6 +9,8 @@ rabbitmq:
   uri: "amqp://rabbit:password@rabbitmq:5672/"
   queueName: "calendar_notifications"
   exchangeName: "calendar_exchange"
+  statusQueueName: ""
+  statusRoutingKey: ""
 
 scheduler:
   interval: "1m"

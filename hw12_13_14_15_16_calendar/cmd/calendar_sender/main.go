@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal"
 	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/config"
 	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/storage/rmq"
@@ -35,7 +36,7 @@ func main() {
 	logg.Info(fmt.Sprintf("Config: %+v", cfg))
 
 	// Create RabbitMQ client
-	queue := rmq.NewRabbitMQ(cfg.RabbitMQ.URI, cfg.RabbitMQ.QueueName, cfg.RabbitMQ.ExchangeName)
+	queue := rmq.NewRabbitMQFromConfig(&cfg.RabbitMQ)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -77,11 +78,22 @@ func main() {
 				return
 			}
 			// Log the notification (instead of actually sending)
-			logg.Info(fmt.Sprintf("Received notification: EventID=%s, Title='%s', Date=%s, UserID=%s",
+			logg.Info(fmt.Sprintf("Notification processed successfully: EventID=%s, Title='%s', Date=%s, UserID=%s",
 				notification.EventID,
 				notification.EventTitle,
 				notification.EventDate.Format(time.RFC3339),
 				notification.UserID))
+
+			// Publish notification status
+			status := internal.NewNotificationStatus(
+				notification.EventID,
+				"processed",
+				notification.UserID,
+				time.Now(),
+			).WithEventDetails(notification.EventTitle, notification.EventDate)
+			if err := queue.PublishNotificationStatus(ctx, status); err != nil {
+				logg.Error(fmt.Sprintf("Failed to publish notification status: %v", err))
+			}
 		}
 	}
 }

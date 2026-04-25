@@ -87,6 +87,7 @@ generate-proto:
 
 # Docker Compose
 COMPOSE_FILE := deployments/docker-compose.yaml
+COMPOSE_INTEGRATION_FILE := deployments/docker-compose.integration.yaml
 
 up:
 	docker-compose -f $(COMPOSE_FILE) up
@@ -100,4 +101,10 @@ up-detached:
 logs:
 	docker-compose -f $(COMPOSE_FILE) logs -f
 
-.PHONY: build run build-img run-img version test lint generate-proto up down up-detached logs migrate-up migrate-down migrate-status migrate-create
+integration-tests:
+	docker-compose -f $(COMPOSE_INTEGRATION_FILE) up --abort-on-container-exit --exit-code-from integration-tests; \
+	EXIT_CODE=$$?; \
+	docker-compose -f $(COMPOSE_INTEGRATION_FILE) down; \
+	exit $$EXIT_CODE
+
+.PHONY: build run build-img run-img version test lint generate-proto up down up-detached logs migrate-up migrate-down migrate-status migrate-create integration-tests
