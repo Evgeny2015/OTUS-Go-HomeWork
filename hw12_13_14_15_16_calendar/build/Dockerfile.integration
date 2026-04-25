@@ -33,4 +33,4 @@ ENV RABBITMQ_HOST=rabbitmq
 ENV RABBITMQ_PORT=5672
 
 # Wait for calendar service to be ready, then run integration tests
-CMD ["sh", "-c", "/usr/local/bin/wait-for-it.sh $CALENDAR_HOST:$CALENDAR_PORT -- go test -v ./integration"]
+CMD ["sh", "-c", "/usr/local/bin/wait-for-it.sh $CALENDAR_HOST $CALENDAR_PORT go test -v ./integration"]
