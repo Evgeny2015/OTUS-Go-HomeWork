@@ -4,38 +4,22 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v3"
 )
 
 // При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
-type Config struct {
+type CalendarConfig struct {
 	Logger  LoggerConf
 	Storage StorageConf
 	HTTP    HTTPConf
 }
 
-type LoggerConf struct {
-	Level  string `toml:"level"`
-	Output string `toml:"output"` // file path, empty for stdout
-	Format string `toml:"format"` // "text" or "json"
-}
-
-type StorageConf struct {
-	Type string `toml:"type"` // "memory" or "sql"
-	DSN  string `toml:"dsn"`  // Data Source Name for SQL storage, optional for memory
-}
-
-type HTTPConf struct {
-	Host string `toml:"host"`
-	Port string `toml:"port"`
-}
-
-func NewConfig() Config {
+func NewConfig() CalendarConfig {
 	// For backward compatibility, return empty config.
 	// In production, LoadConfig should be used.
-	return Config{
+	return CalendarConfig{
 		HTTP: HTTPConf{
 			Host: "localhost",
 			Port: "8080",
@@ -43,12 +27,19 @@ func NewConfig() Config {
 	}
 }
 
-// LoadConfig reads configuration from the specified TOML file.
-func LoadConfig(filename string) (Config, error) {
-	var config Config
-	if _, err := toml.DecodeFile(filename, &config); err != nil {
-		return config, fmt.Errorf("failed to decode config file %s: %w", filename, err)
+// LoadConfig reads configuration from the specified YAML file.
+func LoadConfig(filename string) (CalendarConfig, error) {
+	var config CalendarConfig
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return config, fmt.Errorf("failed to read config file %s: %w", filename, err)
 	}
+
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		return config, fmt.Errorf("failed to decode YAML config file %s: %w", filename, err)
+	}
+
 	// Set defaults
 	if config.Logger.Level == "" {
 		config.Logger.Level = "INFO"
@@ -70,7 +61,7 @@ func LoadConfig(filename string) (Config, error) {
 
 // LoadConfigFromDefault attempts to load config from the file specified by the -config flag.
 // If the file does not exist or flag is not set, returns default config.
-func LoadConfigFromDefault(configFile string) Config {
+func LoadConfigFromDefault(configFile string) CalendarConfig {
 	if configFile == "" {
 		return NewConfig()
 	}

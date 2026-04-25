@@ -1,0 +1,11 @@
+logger:
+  level: "INFO"
+
+rabbitmq:
+  uri: "amqp://guest:guest@localhost:5672/"
+  queueName: "calendar_notifications"
+  exchangeName: "calendar_exchange"
+
+sender:
+  pollInterval: "1s"
+  batchSize: 10

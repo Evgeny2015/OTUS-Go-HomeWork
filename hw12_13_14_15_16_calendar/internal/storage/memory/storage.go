@@ -128,3 +128,35 @@ func (s *Storage) ListEventsForMonth(ctx context.Context, startOfMonth time.Time
 	}
 	return events, nil
 }
+
+func (s *Storage) GetEventsForNotification(ctx context.Context, fromTime, toTime time.Time) ([]storage.Event, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	events := make([]storage.Event, 0)
+	for _, event := range s.events {
+		// Calculate notification time: event date time minus NotifyBefore duration
+		notificationTime := event.DateTime
+		if event.NotifyBefore > 0 {
+			notificationTime = event.DateTime.Add(-event.NotifyBefore)
+		}
+
+		// Check if notification should be sent between fromTime and toTime
+		if !notificationTime.Before(fromTime) && notificationTime.Before(toTime) {
+			events = append(events, event)
+		}
+	}
+	return events, nil
+}
+
+func (s *Storage) DeleteOldEvents(ctx context.Context, olderThan time.Time) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for id, event := range s.events {
+		if event.DateTime.Before(olderThan) {
+			delete(s.events, id)
+		}
+	}
+	return nil
+}
