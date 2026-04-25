@@ -1,25 +1,112 @@
-version: "3"
+version: "3.8"
 
 services:
   postgres:
     image: postgres:15-alpine
     container_name: calendar-postgres
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: calendar
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-calendar}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - calendar-network
+
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: calendar-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-rabbit}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-password}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_UI_PORT:-15672}:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - calendar-network
+
+  calendar:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile
+    container_name: calendar-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      CALENDAR_HTTP_HOST: "0.0.0.0"
+      CALENDAR_HTTP_PORT: "8080"
+      CALENDAR_STORAGE_TYPE: "sql"
+      CALENDAR_STORAGE_DSN: "host=postgres port=5432 user=${POSTGRES_USER:-postgres} password=${POSTGRES_PASSWORD:-postgres} dbname=${POSTGRES_DB:-calendar} sslmode=disable"
+      CALENDAR_LOGGER_LEVEL: "INFO"
+    ports:
+      - "${CALENDAR_PORT:-8000}:8080"
+    networks:
+      - calendar-network
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+  scheduler:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile.scheduler
+    container_name: calendar-scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SCHEDULER_STORAGE_TYPE: "sql"
+      SCHEDULER_STORAGE_DSN: "host=postgres port=5432 user=${POSTGRES_USER:-postgres} password=${POSTGRES_PASSWORD:-postgres} dbname=${POSTGRES_DB:-calendar} sslmode=disable"
+      SCHEDULER_RABBITMQ_URI: "amqp://${RABBITMQ_USER:-rabbit}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672/"
+      SCHEDULER_RABBITMQ_QUEUE: "calendar_notifications"
+      SCHEDULER_RABBITMQ_EXCHANGE: "calendar_exchange"
+      SCHEDULER_INTERVAL: "1m"
+      SCHEDULER_LOOKAHEAD: "24h"
+      SCHEDULER_CLEANUP_OLDER: "8760h"
+      SCHEDULER_LOGGER_LEVEL: "INFO"
+    networks:
+      - calendar-network
+    restart: unless-stopped
+
+  sender:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile.sender
+    container_name: calendar-sender
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SENDER_RABBITMQ_URI: "amqp://${RABBITMQ_USER:-rabbit}:${RABBITMQ_PASSWORD:-password}@rabbitmq:5672/"
+      SENDER_RABBITMQ_QUEUE: "calendar_notifications"
+      SENDER_RABBITMQ_EXCHANGE: "calendar_exchange"
+      SENDER_POLL_INTERVAL: "1s"
+      SENDER_BATCH_SIZE: "10"
+      SENDER_LOGGER_LEVEL: "INFO"
+    networks:
+      - calendar-network
+    restart: unless-stopped
 
 volumes:
   postgres_data:
