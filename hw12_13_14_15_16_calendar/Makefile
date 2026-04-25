@@ -1,6 +1,7 @@
 BIN_CALENDAR := "./bin/calendar"
 BIN_SCHEDULER := "./bin/calendar_scheduler"
 BIN_SENDER := "./bin/calendar_sender"
+BIN_MIGRATE := "./bin/migrate"
 DOCKER_IMG="calendar:develop"
 
 GIT_HASH := $(shell git log --format="%h" -n 1)
@@ -42,9 +43,23 @@ build:
 	go build -v -o $(BIN_CALENDAR) -ldflags "$(LDFLAGS)" ./cmd/calendar
 	go build -v -o $(BIN_SCHEDULER) -ldflags "$(LDFLAGS)" ./cmd/calendar_scheduler
 	go build -v -o $(BIN_SENDER) -ldflags "$(LDFLAGS)" ./cmd/calendar_sender
+	go build -v -o $(BIN_MIGRATE) -ldflags "$(LDFLAGS)" ./cmd/migrate
 
 run: build
 	$(BIN_CALENDAR) -config ./configs/calendar_config.yml
+
+# Migrations
+migrate-up: build
+	$(BIN_MIGRATE) -command up -dsn "host=localhost port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+
+migrate-down: build
+	$(BIN_MIGRATE) -command down -dsn "host=localhost port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+
+migrate-status: build
+	$(BIN_MIGRATE) -command status -dsn "host=localhost port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+
+migrate-create: build
+	$(BIN_MIGRATE) -command create -dir ./migrations $(filter-out $@,$(MAKECMDGOALS))
 
 build-img:
 	docker build \
@@ -70,4 +85,26 @@ lint: install-lint-deps
 generate-proto:
 	protoc --go_out=. --go-grpc_out=. -I. internal/server/protobuf/*.proto
 
-.PHONY: build run build-img run-img version test lint generate-proto
+# Docker Compose
+COMPOSE_FILE := deployments/docker-compose.yaml
+COMPOSE_INTEGRATION_FILE := deployments/docker-compose.integration.yaml
+
+up:
+	docker-compose -f $(COMPOSE_FILE) up
+
+down:
+	docker-compose -f $(COMPOSE_FILE) down
+
+up-detached:
+	docker-compose -f $(COMPOSE_FILE) up -d
+
+logs:
+	docker-compose -f $(COMPOSE_FILE) logs -f
+
+integration-tests:
+	docker-compose -f $(COMPOSE_INTEGRATION_FILE) up --abort-on-container-exit --exit-code-from integration-tests; \
+	EXIT_CODE=$$?; \
+	docker-compose -f $(COMPOSE_INTEGRATION_FILE) down; \
+	exit $$EXIT_CODE
+
+.PHONY: build run build-img run-img version test lint generate-proto up down up-detached logs migrate-up migrate-down migrate-status migrate-create integration-tests

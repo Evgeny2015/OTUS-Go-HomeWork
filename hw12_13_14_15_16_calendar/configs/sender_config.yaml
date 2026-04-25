@@ -2,9 +2,11 @@ logger:
   level: "INFO"
 
 rabbitmq:
-  uri: "amqp://guest:guest@localhost:5672/"
+  uri: "amqp://rabbit:password@rabbitmq:5672/"
   queueName: "calendar_notifications"
   exchangeName: "calendar_exchange"
+  statusQueueName: "notification_status"
+  statusRoutingKey: "notification_status"
 
 sender:
   pollInterval: "1s"
