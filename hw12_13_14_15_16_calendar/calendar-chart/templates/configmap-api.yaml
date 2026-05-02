@@ -1,0 +1,19 @@
+{{- if .Values.api.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-api-config
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api
+data:
+  calendar_config.yml: |
+    logger:
+      level: {{ .Values.api.config.logger.level | default "INFO" | quote }}
+    storage:
+      type: {{ .Values.api.config.storage.type | quote }}
+      dsn: {{ .Values.api.config.storage.dsn | quote }}
+    http:
+      host: {{ .Values.api.config.http.host | quote }}
+      port: {{ .Values.api.config.http.port | quote }}
+{{- end }}
