@@ -1,0 +1,61 @@
+# Patterns to ignore when building packages.
+# This file supports bash glob matching, relative path matching, and
+# negation (prefixed with !). Only one pattern per line.
+
+.DS_Store
+# Common VCS dirs
+.git/
+.gitignore
+.bzr/
+.bzrignore
+.hg/
+.hgignore
+.svn/
+# Common backup files
+*.swp
+*.bak
+*.tmp
+*~
+# Various IDEs
+.project
+.idea/
+*.tmproj
+.vscode/
+# OS generated files
+Thumbs.db
+ehthumbs.db
+Icon?
+nohup.out
+ls-al.txt
+
+# Binary executables
+calendar.exe
+calendar_scheduler.exe
+calendar_sender.exe
+*.exe
+# Go binaries
+bin/
+# Logs
+logs/
+# Source code directories (not needed in chart)
+api/
+build/
+cmd/
+configs/
+deployments/
+integration/
+internal/
+migrations/
+# Test files
+*_test.go
+# Protobuf generated files
+*.pb.go
+# Configuration files not needed
+.golangci.yml
+.dockerignore
+go.mod
+go.sum
+Makefile
+# Large archives
+*.tar.gz
+*.zip

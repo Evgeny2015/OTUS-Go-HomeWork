@@ -1,0 +1,26 @@
+{{- if .Values.scheduler.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-scheduler-config
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: scheduler
+data:
+  scheduler_config.yaml: |
+    logger:
+      level: {{ .Values.scheduler.config.logger.level | default "INFO" | quote }}
+    storage:
+      type: {{ .Values.scheduler.config.storage.type | quote }}
+      dsn: {{ .Values.scheduler.config.storage.dsn | quote }}
+    rabbitmq:
+      uri: {{ .Values.scheduler.config.rabbitmq.uri | quote }}
+      queueName: {{ .Values.scheduler.config.rabbitmq.queueName | quote }}
+      exchangeName: {{ .Values.scheduler.config.rabbitmq.exchangeName | quote }}
+      statusQueueName: {{ .Values.scheduler.config.rabbitmq.statusQueueName | quote }}
+      statusRoutingKey: {{ .Values.scheduler.config.rabbitmq.statusRoutingKey | quote }}
+    scheduler:
+      interval: {{ .Values.scheduler.config.scheduler.interval | quote }}
+      lookAhead: {{ .Values.scheduler.config.scheduler.lookAhead | quote }}
+      cleanupOlder: {{ .Values.scheduler.config.scheduler.cleanupOlder | quote }}
+{{- end }}
