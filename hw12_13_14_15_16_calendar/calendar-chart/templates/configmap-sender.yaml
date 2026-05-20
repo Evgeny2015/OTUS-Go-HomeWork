@@ -1,0 +1,22 @@
+{{- if .Values.sender.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "calendar-chart.fullname" . }}-sender-config
+  labels:
+    {{- include "calendar-chart.labels" . | nindent 4 }}
+    app.kubernetes.io/component: sender
+data:
+  sender_config.yaml: |
+    logger:
+      level: {{ .Values.sender.config.logger.level | default "INFO" | quote }}
+    rabbitmq:
+      uri: {{ .Values.sender.config.rabbitmq.uri | quote }}
+      queueName: {{ .Values.sender.config.rabbitmq.queueName | quote }}
+      exchangeName: {{ .Values.sender.config.rabbitmq.exchangeName | quote }}
+      statusQueueName: {{ .Values.sender.config.rabbitmq.statusQueueName | quote }}
+      statusRoutingKey: {{ .Values.sender.config.rabbitmq.statusRoutingKey | quote }}
+    sender:
+      pollInterval: {{ .Values.sender.config.sender.pollInterval | quote }}
+      batchSize: {{ .Values.sender.config.sender.batchSize }}
+{{- end }}
