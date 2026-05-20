@@ -1,0 +1,36 @@
+# Dockerfile for integration tests
+FROM golang:1.25-alpine AS build
+
+ENV CODE_DIR=/go/src/
+
+WORKDIR ${CODE_DIR}
+
+# Copy go.mod and go.sum to cache dependencies
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy source code
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY api/ ./api/
+COPY migrations/ ./migrations/
+COPY integration/ ./integration/
+COPY configs/ ./configs/
+
+# Install wait-for-it dependencies (netcat, bash)
+RUN apk add --no-cache bash curl netcat-openbsd
+
+# Copy wait-for-it script
+COPY build/wait-for-it.sh /usr/local/bin/wait-for-it.sh
+RUN chmod +x /usr/local/bin/wait-for-it.sh
+
+# Set environment variables for tests
+ENV CALENDAR_HOST=calendar
+ENV CALENDAR_PORT=8080
+ENV POSTGRES_HOST=postgres
+ENV POSTGRES_PORT=5432
+ENV RABBITMQ_HOST=rabbitmq
+ENV RABBITMQ_PORT=5672
+
+# Wait for calendar service to be ready, then run integration tests
+CMD ["sh", "-c", "/usr/local/bin/wait-for-it.sh $CALENDAR_HOST $CALENDAR_PORT go test -v ./integration"]

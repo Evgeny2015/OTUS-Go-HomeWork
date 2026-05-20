@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE events (
+CREATE TABLE IF NOT EXISTS events (
     id VARCHAR(36) PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     date_time TIMESTAMP WITH TIME ZONE NOT NULL,
@@ -12,8 +12,8 @@ CREATE TABLE events (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_events_date_time ON events(date_time);
-CREATE INDEX idx_events_user_id ON events(user_id);
+CREATE INDEX IF NOT EXISTS idx_events_date_time ON events(date_time);
+CREATE INDEX IF NOT EXISTS idx_events_user_id ON events(user_id);
 -- +goose StatementEnd
 
 -- +goose Down

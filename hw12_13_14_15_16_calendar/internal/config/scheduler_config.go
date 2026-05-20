@@ -67,5 +67,53 @@ func LoadSchedulerConfig(filename string) (SchedulerConfig, error) {
 	if config.Scheduler.CleanupOlder == "" {
 		config.Scheduler.CleanupOlder = "8760h" // 1 year in hours
 	}
+
+	// Apply environment variable overrides
+	applySchedulerEnvOverrides(&config)
+
 	return config, nil
+}
+
+// applySchedulerEnvOverrides updates config fields from environment variables.
+func applySchedulerEnvOverrides(config *SchedulerConfig) {
+	// Logger
+	if v := os.Getenv("SCHEDULER_LOGGER_LEVEL"); v != "" {
+		config.Logger.Level = v
+	}
+	if v := os.Getenv("SCHEDULER_LOGGER_OUTPUT"); v != "" {
+		config.Logger.Output = v
+	}
+	if v := os.Getenv("SCHEDULER_LOGGER_FORMAT"); v != "" {
+		config.Logger.Format = v
+	}
+
+	// Storage
+	if v := os.Getenv("SCHEDULER_STORAGE_TYPE"); v != "" {
+		config.Storage.Type = v
+	}
+	if v := os.Getenv("SCHEDULER_STORAGE_DSN"); v != "" {
+		config.Storage.DSN = v
+	}
+
+	// RabbitMQ
+	if v := os.Getenv("SCHEDULER_RABBITMQ_URI"); v != "" {
+		config.RabbitMQ.URI = v
+	}
+	if v := os.Getenv("SCHEDULER_RABBITMQ_QUEUE"); v != "" {
+		config.RabbitMQ.QueueName = v
+	}
+	if v := os.Getenv("SCHEDULER_RABBITMQ_EXCHANGE"); v != "" {
+		config.RabbitMQ.ExchangeName = v
+	}
+
+	// Scheduler
+	if v := os.Getenv("SCHEDULER_INTERVAL"); v != "" {
+		config.Scheduler.Interval = v
+	}
+	if v := os.Getenv("SCHEDULER_LOOKAHEAD"); v != "" {
+		config.Scheduler.LookAhead = v
+	}
+	if v := os.Getenv("SCHEDULER_CLEANUP_OLDER"); v != "" {
+		config.Scheduler.CleanupOlder = v
+	}
 }

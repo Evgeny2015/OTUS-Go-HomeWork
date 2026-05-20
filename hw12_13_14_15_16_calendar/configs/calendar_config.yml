@@ -6,11 +6,11 @@ logger:
 
 storage:
   type: "sql"
-  dsn: "host=localhost port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+  dsn: "host=postgres port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
   # For in‑memory storage use:
   # type: "memory"
   # dsn: ""
 
 http:
-  host: "localhost"
+  host: "0.0.0.0"
   port: "8080"

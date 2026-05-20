@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -12,7 +10,6 @@ services:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./migrations:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 10s
@@ -38,6 +35,24 @@ services:
     networks:
       - calendar-network
 
+  migrations:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile.migrations
+    container_name: calendar-migrations
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      -dir /migrations postgres
+      "host=postgres port=5432 user=${POSTGRES_USER:-postgres} password=${POSTGRES_PASSWORD:-postgres} dbname=${POSTGRES_DB:-calendar} sslmode=disable"
+      up
+    volumes:
+      - ../migrations:/migrations
+    networks:
+      - calendar-network
+    restart: "no"
+
   calendar:
     build:
       context: ../
@@ -48,6 +63,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrations:
+        condition: service_started
     environment:
       CALENDAR_HTTP_HOST: "0.0.0.0"
       CALENDAR_HTTP_PORT: "8080"
@@ -75,6 +92,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+      migrations:
+        condition: service_started
     environment:
       SCHEDULER_STORAGE_TYPE: "sql"
       SCHEDULER_STORAGE_DSN: "host=postgres port=5432 user=${POSTGRES_USER:-postgres} password=${POSTGRES_PASSWORD:-postgres} dbname=${POSTGRES_DB:-calendar} sslmode=disable"
@@ -107,6 +126,28 @@ services:
     networks:
       - calendar-network
     restart: unless-stopped
+
+  integration-tests:
+    build:
+      context: ../
+      dockerfile: build/Dockerfile.integration
+    container_name: calendar-integration-tests
+    depends_on:
+      calendar:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      CALENDAR_HOST: "calendar"
+      CALENDAR_PORT: "8080"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      RABBITMQ_HOST: "rabbitmq"
+      RABBITMQ_PORT: "5672"
+    networks:
+      - calendar-network
 
 volumes:
   postgres_data:

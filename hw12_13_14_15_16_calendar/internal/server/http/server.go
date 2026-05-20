@@ -85,6 +85,13 @@ func NewServer(logger Logger, app Application, host, port string) *Server {
 		fmt.Fprintln(w, "Hello, World!")
 	})
 
+	// Add /health endpoint for health checks
+	mux.HandleFunc("/health", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintln(w, "OK")
+	})
+
 	// Wrap with logging middleware
 	handler := loggingMiddleware(logger, mux)
 

@@ -49,6 +49,7 @@ testdata/
 
 # Сборки
 build/
+!build/wait-for-it.sh
 Dockerfile*
 
 # Прочее

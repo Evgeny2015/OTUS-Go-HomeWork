@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal"
+	"github.com/Evgeny2015/OTUS-Go-HomeWork/hw12_13_14_15_calendar/internal/config"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -16,24 +17,38 @@ type Queue interface {
 	Connect(ctx context.Context) error
 	Close() error
 	PublishNotification(ctx context.Context, notification *internal.Notification) error
+	PublishNotificationStatus(ctx context.Context, status *internal.NotificationStatus) error
 	ConsumeNotifications(ctx context.Context) (<-chan internal.Notification, error)
 }
 
 // RabbitMQ implements Queue interface using RabbitMQ
 type RabbitMQ struct {
-	conn         *amqp.Connection
-	channel      *amqp.Channel
-	queueName    string
-	exchangeName string
-	uri          string
+	conn             *amqp.Connection
+	channel          *amqp.Channel
+	queueName        string
+	exchangeName     string
+	uri              string
+	statusQueueName  string
+	statusRoutingKey string
 }
 
-// NewRabbitMQ creates a new RabbitMQ instance
+// NewRabbitMQ creates a new RabbitMQ instance (legacy)
 func NewRabbitMQ(uri, queueName, exchangeName string) *RabbitMQ {
 	return &RabbitMQ{
 		uri:          uri,
 		queueName:    queueName,
 		exchangeName: exchangeName,
+	}
+}
+
+// NewRabbitMQFromConfig creates a new RabbitMQ instance from config
+func NewRabbitMQFromConfig(cfg *config.RabbitMQConf) *RabbitMQ {
+	return &RabbitMQ{
+		uri:              cfg.URI,
+		queueName:        cfg.QueueName,
+		exchangeName:     cfg.ExchangeName,
+		statusQueueName:  cfg.StatusQueueName,
+		statusRoutingKey: cfg.StatusRoutingKey,
 	}
 }
 
@@ -64,7 +79,7 @@ func (r *RabbitMQ) Connect(ctx context.Context) error {
 		return fmt.Errorf("failed to declare exchange: %w", err)
 	}
 
-	// Declare queue
+	// Declare main queue
 	_, err = r.channel.QueueDeclare(
 		r.queueName, // name
 		true,        // durable
@@ -77,7 +92,7 @@ func (r *RabbitMQ) Connect(ctx context.Context) error {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
 
-	// Bind queue to exchange
+	// Bind main queue to exchange
 	err = r.channel.QueueBind(
 		r.queueName,     // queue name
 		"notifications", // routing key
@@ -87,6 +102,37 @@ func (r *RabbitMQ) Connect(ctx context.Context) error {
 	)
 	if err != nil {
 		return fmt.Errorf("failed to bind queue: %w", err)
+	}
+
+	// Declare and bind status queue if configured
+	if r.statusQueueName != "" {
+		_, err = r.channel.QueueDeclare(
+			r.statusQueueName, // name
+			true,              // durable
+			false,             // delete when unused
+			false,             // exclusive
+			false,             // no-wait
+			nil,               // arguments
+		)
+		if err != nil {
+			return fmt.Errorf("failed to declare status queue: %w", err)
+		}
+
+		routingKey := r.statusRoutingKey
+		if routingKey == "" {
+			routingKey = "notification_status"
+		}
+		err = r.channel.QueueBind(
+			r.statusQueueName, // queue name
+			routingKey,        // routing key
+			r.exchangeName,    // exchange
+			false,             // no-wait
+			nil,               // arguments
+		)
+		if err != nil {
+			return fmt.Errorf("failed to bind status queue: %w", err)
+		}
+		log.Printf("Declared status queue: %s with routing key: %s", r.statusQueueName, routingKey)
 	}
 
 	log.Printf("Connected to RabbitMQ at %s, queue: %s, exchange: %s", r.uri, r.queueName, r.exchangeName)
@@ -144,6 +190,48 @@ func (r *RabbitMQ) PublishNotification(ctx context.Context, notification *intern
 	return nil
 }
 
+// PublishNotificationStatus publishes a notification status to the status queue
+func (r *RabbitMQ) PublishNotificationStatus(ctx context.Context, status *internal.NotificationStatus) error {
+	if r.channel == nil {
+		return fmt.Errorf("channel is not initialized")
+	}
+	if r.statusQueueName == "" {
+		// status publishing disabled
+		return nil
+	}
+
+	body, err := status.ToJSON()
+	if err != nil {
+		return fmt.Errorf("failed to marshal notification status: %w", err)
+	}
+
+	routingKey := r.statusRoutingKey
+	if routingKey == "" {
+		routingKey = "notification_status"
+	}
+
+	err = r.channel.PublishWithContext(
+		ctx,
+		r.exchangeName, // exchange
+		routingKey,     // routing key
+		false,          // mandatory
+		false,          // immediate
+		amqp.Publishing{
+			ContentType:  "application/json",
+			Body:         body,
+			DeliveryMode: amqp.Persistent,
+			Timestamp:    time.Now(),
+			// No expiration for status messages
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("failed to publish notification status: %w", err)
+	}
+
+	log.Printf("Published notification status for event %s with status %s", status.EventID, status.Status)
+	return nil
+}
+
 // ConsumeNotifications starts consuming notifications from the queue
 func (r *RabbitMQ) ConsumeNotifications(ctx context.Context) (<-chan internal.Notification, error) {
 	if r.channel == nil {
@@ -179,10 +267,12 @@ func (r *RabbitMQ) ConsumeNotifications(ctx context.Context) (<-chan internal.No
 				if err := json.Unmarshal(msg.Body, &notification); err != nil {
 					log.Printf("Failed to unmarshal notification: %v", err)
 					msg.Nack(false, false) // reject message without requeue
+					log.Printf("Notification rejected (unmarshal error) for delivery tag %d", msg.DeliveryTag)
 					continue
 				}
 				notifications <- notification
 				msg.Ack(false)
+				log.Printf("Notification acknowledged for event %s", notification.EventID)
 			}
 		}
 	}()

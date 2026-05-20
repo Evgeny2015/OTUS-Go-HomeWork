@@ -1,0 +1,13 @@
+# Dockerfile for migrations using goose
+FROM golang:1.25-alpine
+
+# Install goose
+RUN go install github.com/pressly/goose/v3/cmd/goose@latest
+
+# Create a directory for migrations
+WORKDIR /migrations
+
+# The actual migrations will be mounted as a volume
+# This Dockerfile just provides the goose binary
+
+ENTRYPOINT ["/go/bin/goose"]

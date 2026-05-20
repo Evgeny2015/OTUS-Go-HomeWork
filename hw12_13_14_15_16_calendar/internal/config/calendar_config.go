@@ -56,20 +56,59 @@ func LoadConfig(filename string) (CalendarConfig, error) {
 	if config.HTTP.Port == "" {
 		config.HTTP.Port = "8080"
 	}
+
+	// Apply environment variable overrides
+	applyEnvOverrides(&config)
+
 	return config, nil
 }
 
-// LoadConfigFromDefault attempts to load config from the file specified by the -config flag.
-// If the file does not exist or flag is not set, returns default config.
-func LoadConfigFromDefault(configFile string) CalendarConfig {
-	if configFile == "" {
-		return NewConfig()
+// applyEnvOverrides updates config fields from environment variables.
+func applyEnvOverrides(config *CalendarConfig) {
+	// Logger
+	if v := os.Getenv("CALENDAR_LOGGER_LEVEL"); v != "" {
+		config.Logger.Level = v
 	}
-	config, err := LoadConfig(configFile)
+	if v := os.Getenv("CALENDAR_LOGGER_OUTPUT"); v != "" {
+		config.Logger.Output = v
+	}
+	if v := os.Getenv("CALENDAR_LOGGER_FORMAT"); v != "" {
+		config.Logger.Format = v
+	}
+
+	// Storage
+	if v := os.Getenv("CALENDAR_STORAGE_TYPE"); v != "" {
+		config.Storage.Type = v
+	}
+	if v := os.Getenv("CALENDAR_STORAGE_DSN"); v != "" {
+		config.Storage.DSN = v
+	}
+
+	// HTTP
+	if v := os.Getenv("CALENDAR_HTTP_HOST"); v != "" {
+		config.HTTP.Host = v
+	}
+	if v := os.Getenv("CALENDAR_HTTP_PORT"); v != "" {
+		config.HTTP.Port = v
+	}
+}
+
+// LoadConfigFromDefault attempts to load config from the file specified by the -config flag.
+// If the file does not exist or flag is not set, returns default config with environment overrides applied.
+func LoadConfigFromDefault(configFile string) CalendarConfig {
+	var config CalendarConfig
+	if configFile == "" {
+		config = NewConfig()
+		applyEnvOverrides(&config)
+		return config
+	}
+	loadedConfig, err := LoadConfig(configFile)
 	if err != nil {
 		// Log error but continue with default config (maybe we should exit)
 		fmt.Fprintf(os.Stderr, "WARNING: failed to load config: %v\n", err)
-		return NewConfig()
+		config = NewConfig()
+		applyEnvOverrides(&config)
+		return config
 	}
-	return config
+	return loadedConfig
 }
