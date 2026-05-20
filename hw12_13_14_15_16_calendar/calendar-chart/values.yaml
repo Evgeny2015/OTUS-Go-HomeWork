@@ -1,0 +1,140 @@
+# Default values for calendar-chart.
+global:
+  # Overrides the image tag whose default is the chart appVersion.
+  imagePullSecrets: []
+  nameOverride: ""
+  fullnameOverride: ""
+
+replicaCount: 1
+
+image:
+  repository: my-calendar-app
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+# Component-specific configurations
+api:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: my-calendar-app
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  ingress:
+    enabled: false
+    className: ""
+    annotations: {}
+    hosts:
+      - host: calendar.local
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    - name: CONFIG_FILE
+      value: "/etc/calendar/calendar_config.yml"
+    - name: LOG_LEVEL
+      value: "INFO"
+  config:
+    # Override config values for API
+    logger:
+      level: "INFO"
+    storage:
+      type: "sql"
+      dsn: "host=postgres port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+    http:
+      host: "0.0.0.0"
+      port: "8080"
+
+scheduler:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: my-calendar-app
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    - name: CONFIG_FILE
+      value: "/etc/calendar/scheduler_config.yaml"
+    - name: LOG_LEVEL
+      value: "INFO"
+  config:
+    logger:
+      level: "INFO"
+    storage:
+      type: "sql"
+      dsn: "host=postgres port=5432 user=postgres password=postgres dbname=calendar sslmode=disable"
+    rabbitmq:
+      uri: "amqp://rabbit:password@rabbitmq:5672/"
+      queueName: "calendar_notifications"
+      exchangeName: "calendar_exchange"
+      statusQueueName: ""
+      statusRoutingKey: ""
+    scheduler:
+      interval: "1m"
+      lookAhead: "24h"
+      cleanupOlder: "8760h"
+
+sender:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: my-calendar-app
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+  resources: {}
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  env:
+    - name: CONFIG_FILE
+      value: "/etc/calendar/sender_config.yaml"
+    - name: LOG_LEVEL
+      value: "INFO"
+  config:
+    logger:
+      level: "INFO"
+    rabbitmq:
+      uri: "amqp://rabbit:password@rabbitmq:5672/"
+      queueName: "calendar_notifications"
+      exchangeName: "calendar_exchange"
+      statusQueueName: "notification_status"
+      statusRoutingKey: "notification_status"
+    sender:
+      pollInterval: "1s"
+      batchSize: 10
+
+# External dependencies
+postgresql:
+  enabled: true
+  # If using bitnami postgresql subchart
+  # postgresqlDatabase: calendar
+  # postgresqlUsername: postgres
+  # postgresqlPassword: postgres
+
+rabbitmq:
+  enabled: true
+  # If using bitnami rabbitmq subchart
+  # rabbitmq:
+  #   username: rabbit
+  #   password: password
